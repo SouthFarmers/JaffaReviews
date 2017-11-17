@@ -1,0 +1,36 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="FollowButton" parent="Theme.AppCompat">
+        <item name="colorButtonNormal">@color/colorPrimary</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+    </style>
+
+
+
+    <style name="CardStyle" parent="CardView.Light">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+    </style>
+
+    <style name="CardStyle.Home">
+        <item name="contentPaddingBottom">@dimen/content_spacing_vertical</item>
+        <item name="contentPaddingLeft">@dimen/content_spacing_horizontal</item>
+        <item name="contentPaddingRight">@dimen/content_spacing_horizontal</item>
+        <item name="contentPaddingTop">@dimen/content_spacing_vertical</item>
+        <item name="android:layout_marginBottom">@dimen/view_spacing_small</item>
+        <item name="android:layout_marginLeft">@dimen/screen_spacing_horizontal</item>
+        <item name="android:layout_marginRight">@dimen/screen_spacing_horizontal</item>
+        <item name="android:layout_marginTop">@dimen/view_spacing_small</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="FullScreenDialogToolbar" parent="Widget.AppCompat.Toolbar" />
+</resources>
