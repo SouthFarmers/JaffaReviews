@@ -165,19 +165,22 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/profile_review_count"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:id="@+id/profile_logout"
             android:orientation="vertical">
 
 
-            <!--<com.facebook.login.widget.LoginButton-->
-                <!--android:id="@+id/loginButton"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="20dp"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--facebook:com_facebook_confirm_logout="true"-->
-                <!--facebook:com_facebook_tooltip_mode="never_display" />-->
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/loginButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:layout_marginTop="5dp"
+                android:layout_gravity="center_horizontal"
+                facebook:com_facebook_confirm_logout="true"
+                facebook:com_facebook_tooltip_mode="never_display"/>
 
         </LinearLayout>
 

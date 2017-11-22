@@ -36,7 +36,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="fitXY"
-                        android:alpha=".55"
+                        android:id="@+id/detail_cover_pic"
+                        android:alpha=".75"
                         android:src="@drawable/manam"/>
 
                     <ImageView

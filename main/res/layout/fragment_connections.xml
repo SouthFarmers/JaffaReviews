@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/connections_friends_label"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:text="My Jaffa Friends"
+                android:background="#fff"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/connections_friends"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                     />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/search_critics_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/connections_critics_label"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:background="#fff"
+                android:text="My Jaffa Critics"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/connections_critics"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp" />
+        </LinearLayout>
+
+
+
+
+</LinearLayout>
