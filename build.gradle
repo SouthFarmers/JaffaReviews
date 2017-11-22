@@ -55,8 +55,8 @@ dependencies {
     compile 'com.twitter.sdk.android:twitter-core:3.0.0'
     compile 'com.twitter.sdk.android:tweet-ui:3.0.0'
     compile 'com.twitter.sdk.android:tweet-composer:3.0.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.6.0'
     compile 'com.google.android.gms:play-services-analytics:10.2.4'
 
-    compile 'com.github.droidbyme:DroidDialog:c6decc7167'
 
 }
