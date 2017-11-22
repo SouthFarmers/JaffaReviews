@@ -51,6 +51,7 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
     private SwitchCompat notificationsSwitch, profileTypeSwitch;
     private CheckBox friendsRatingCheckbox, criticsRatingCheckbox, releasingThisWeekCheckbox;
     boolean profileTypeFlag, friendsRatingFlag, criticsRatingFlag, releasingThisWeekFlag;
+    String restoreduserid;
 
     public static SettingsFragment newInstance() {
         Bundle args = new Bundle();
@@ -99,6 +100,7 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
         View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
 
         SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
+        restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
         notificationsSwitch = (SwitchCompat) rootView.findViewById(R.id.notifications_switch);
         profileTypeSwitch = (SwitchCompat) rootView.findViewById(R.id.profile_type_switch);
         friendsRatingCheckbox = (CheckBox) rootView.findViewById(R.id.friends_ratings_checkbox);
@@ -146,7 +148,7 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
     }
 
     public void getInitialSettings(){
-        String url ="http://jaffareviews.com/api/Movie/GetSettings?UserFbID=1468306842";
+        String url ="http://jaffareviews.com/api/Movie/GetSettings?UserFbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -190,7 +192,7 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
             jsonObject.put("Notification_MyCriticRating", criticsRatingFlag);
             jsonObject.put("Notification_NewReleases", releasingThisWeekFlag);
             jsonObject.put("IsCritic", profileTypeFlag);
-            jsonObject.put("FbID", "1468306842");
+            jsonObject.put("FbID", restoreduserid);
             jsonArray.put(jsonObject);
 
         } catch (Exception e) {

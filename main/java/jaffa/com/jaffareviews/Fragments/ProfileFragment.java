@@ -3,12 +3,15 @@ package jaffa.com.jaffareviews.Fragments;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +25,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.droidbyme.dialoglib.DroidDialog;
+import com.facebook.login.LoginManager;
+import com.facebook.login.widget.LoginButton;
 import com.mingle.widget.LoadingView;
 
 import org.json.JSONException;
@@ -30,9 +34,14 @@ import org.json.JSONObject;
 
 import jaffa.com.jaffareviews.FullScreenDialog.FullScreenDialogContent;
 import jaffa.com.jaffareviews.FullScreenDialog.FullScreenDialogController;
+import jaffa.com.jaffareviews.Helpers.AnimUtils;
+import jaffa.com.jaffareviews.Helpers.DroidDialog;
 import jaffa.com.jaffareviews.Helpers.ImageHelper;
 import jaffa.com.jaffareviews.R;
+import jaffa.com.jaffareviews.SplashActivity;
 import jaffa.com.jaffareviews.Volley.VolleySingleton;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by gautham on 11/17/17.
@@ -45,6 +54,8 @@ public class ProfileFragment extends Fragment implements FullScreenDialogContent
     ImageView profilepicture;
     TextView profileName, profileEmail, profileFollowers, profileReviews, profileType, profileMemberSince, profilePrivacyPolicy, profileDisclaimer, profileAboutUS;
     LoadingView profileProgress;
+    private LoginButton logoutButton;
+    String restoreduserid;
 
     @Nullable
     @Override
@@ -77,6 +88,18 @@ public class ProfileFragment extends Fragment implements FullScreenDialogContent
         profilePrivacyPolicy.setOnClickListener(this);
         profileDisclaimer.setOnClickListener(this);
         profileAboutUS.setOnClickListener(this);
+
+        logoutButton = (LoginButton) getView().findViewById(R.id.loginButton);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logout();
+            }
+        });
+
+        SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
+        restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
+
         getUserInfo();
 
     }
@@ -93,7 +116,7 @@ public class ProfileFragment extends Fragment implements FullScreenDialogContent
     }
 
     public void getUserInfo(){
-        String url ="http://jaffareviews.com/api/Movie/CheckUser?UserFbID=1468306842";
+        String url ="http://jaffareviews.com/api/Movie/CheckUser?UserFbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -160,7 +183,7 @@ public class ProfileFragment extends Fragment implements FullScreenDialogContent
             case R.id.profile_disclaimer:
                 openDisclaimer();
                 break;
-            case R.id.profile_about_us:
+            case R.id.profile_aboutus:
                 openAboutUS();
                 break;
         }
@@ -170,9 +193,10 @@ public class ProfileFragment extends Fragment implements FullScreenDialogContent
     public void openPrivacyPolicy(){
 
         new DroidDialog.Builder(getContext())
+                .icon(R.drawable.ic_close)
                 .title("All Well!")
-                .content(getString(R.string.short_text))
-                .cancelable(false, false)
+                .content(getString(R.string.long_text))
+                .cancelable(true, true)
                 .positiveButton("OK", new DroidDialog.onPositiveListener() {
                     @Override
                     public void onPositive(Dialog droidDialog) {
@@ -185,11 +209,60 @@ public class ProfileFragment extends Fragment implements FullScreenDialogContent
     }
 
     public void openDisclaimer(){
+        new DroidDialog.Builder(getContext())
+                .icon(R.drawable.ic_close)
+                .title("All Well!")
+                .content(getString(R.string.short_text))
+                .cancelable(true, true)
+                .positiveButton("OK", new DroidDialog.onPositiveListener() {
+                    @Override
+                    public void onPositive(Dialog droidDialog) {
+                        droidDialog.dismiss();
+                        Toast.makeText(getContext(), "Ok", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .typeface("regular.ttf")
+                .animation(AnimUtils.AnimFadeInOut)
+                .color(ContextCompat.getColor(getContext(), R.color.indigo), ContextCompat.getColor(getContext(), R.color.white),
+                        ContextCompat.getColor(getContext(), R.color.dark_indigo))
+                .divider(true, ContextCompat.getColor(getContext(), R.color.orange))
+                .show();
 
     }
 
     public void openAboutUS(){
+        new DroidDialog.Builder(getContext())
+                .icon(R.drawable.ic_close)
+                .title("All Well!")
+                .content(getString(R.string.short_text))
+                .cancelable(true, true)
+                .positiveButton("Yes", new DroidDialog.onPositiveListener() {
+                    @Override
+                    public void onPositive(Dialog droidDialog) {
+                        droidDialog.dismiss();
+                        Toast.makeText(getContext(), "Yes", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .negativeButton("No", new DroidDialog.onNegativeListener() {
+                    @Override
+                    public void onNegative(Dialog droidDialog) {
+                        droidDialog.dismiss();
+                        Toast.makeText(getContext(), "No", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .typeface("regular.ttf")
+                .animation(AnimUtils.AnimLeftRight)
+                .show();
 
+    }
+
+    private void logout(){
+        LoginManager.getInstance().logOut();
+        Intent splash = new Intent(getActivity(), SplashActivity.class);
+        splash.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        splash.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        splash.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(splash);
     }
 
 }

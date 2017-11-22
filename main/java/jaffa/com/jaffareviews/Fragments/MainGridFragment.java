@@ -102,7 +102,6 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
 
     public interface OnMainGridFragmentListener {
         void onMovieClick(String title);
-
     }
 
     @Override
@@ -116,8 +115,7 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
         View rootView = inflater.inflate(R.layout.main_grid_fragment, container, false);
 
         SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
-//        restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
-        restoreduserid = "sadsad";
+        restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
 
         progress = (LoadingView) rootView.findViewById(R.id.main_progress);
         mPullToRefresh = (FireworkyPullToRefreshLayout) rootView.findViewById(R.id.pullToRefresh);
@@ -137,9 +135,7 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         initRefreshView();
-
         mPullToRefresh.post(new Runnable() {
             @Override
             public void run() {
@@ -149,7 +145,7 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
     }
 
     public void allMoviesvolley(){
-        String url ="http://jaffareviews.com/api/Movie/GetNewReleases?UserfbID=107886109817802";
+        String url ="http://jaffareviews.com/api/Movie/GetNewReleases?UserfbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -217,10 +213,7 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
     }
 
     public void loadLeaderboard(){
-
-
-//        String url ="http://jaffareviews.com/api/Movie/GetTopCritics?UserFbID="+restoreduserid;
-        String url ="http://jaffareviews.com/api/Movie/GetTopCritics?UserFbID=1526207380794075";
+        String url ="http://jaffareviews.com/api/Movie/GetTopCritics?UserFbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -246,7 +239,6 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
                                 }
                             }
 
-
                             MyRecyclerView.setHasFixedSize(true);
                             LinearLayoutManager MyLayoutManager = new LinearLayoutManager(getActivity());
                             MyLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -254,7 +246,6 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
                                 MyRecyclerView.setAdapter(new LeaderBoardAdapter(getActivity(),listitems));
                             }
                             MyRecyclerView.setLayoutManager(MyLayoutManager);
-
 
                         } catch (JSONException e) {
 

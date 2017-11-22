@@ -5,7 +5,13 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,6 +62,7 @@ import jaffa.com.jaffareviews.Adapters.CriticReviewsAdapter;
 import jaffa.com.jaffareviews.Adapters.FriendReviewsAdapter;
 import jaffa.com.jaffareviews.Adapters.OthersReviewsAdapter;
 import jaffa.com.jaffareviews.Helpers.ExpandedListView;
+import jaffa.com.jaffareviews.Helpers.ImageHelper;
 import jaffa.com.jaffareviews.R;
 import jaffa.com.jaffareviews.Volley.VolleySingleton;
 
@@ -68,10 +75,10 @@ import static android.content.Context.MODE_PRIVATE;
 public class MovieDetailFragment extends ListFragment implements View.OnClickListener {
 
     private static final String movie_NAME = "prop_name";
-    private String movieName, movieDirector, movieRating, movieReleaseDate, movieMusicDirector, movieImage, movieID, numberofreviews;
+    private String movieName, movieDirector, movieRating, movieReleaseDate, movieMusicDirector, movieImage, movieID, numberofreviews, movieCoverPic;
     private OnMovieDetailFragmentListener mListener;
     TextView movie_name, movie_director, movie_rating, movie_releasedate, movie_musicdirector, movie_title, numof_reiews;
-    ImageView movie_img;
+    ImageView movie_img, movie_cover;
     private String friendsIDs = "friendsIDs";
     String frindsIDs = "";
     private static List<String> listRevfrnd_fbId, listRevfrnd_rating, listRevfrnd_revtext, listRevfrnd_revname,
@@ -137,6 +144,7 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         view = inflater.inflate(R.layout.movie_details_view, container, false);
         detailProgress = (LoadingView) view.findViewById(R.id.detail_progress);
         movie_img = (ImageView) view.findViewById(R.id.detail_thumbnail);
+        movie_cover = (ImageView) view.findViewById(R.id.detail_cover_pic);
         movie_title = (TextView) view.findViewById(R.id.movie_title_label);
         movie_director = (TextView) view.findViewById(R.id.movie_detail_director);
         movie_rating = (TextView) view.findViewById(R.id.movie_detail_rating);
@@ -146,6 +154,9 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         frndrevlistView = (ExpandedListView) view.findViewById(R.id.friends_review_list);
         criticrevlistview = (ExpandedListView) view.findViewById(R.id.critic_review_list);
         otherlistview = (ExpandedListView) view.findViewById(R.id.others_review_list);
+
+
+
 
         return view;
     }
@@ -223,8 +234,8 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
 
     public void moviedetailsvolley() {
 
-        //String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=" + movieName + "&fbIds=" + frindsIDs + "&UserFbID=" + restoreduserid;
-        String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=fidaa&fbIds=715741731&UserFbID=107886109817802";
+        String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=" + movieName + "&fbIds=" + frindsIDs + "&UserFbID=" + restoreduserid;
+//        String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=fidaa&fbIds=715741731&UserFbID=107886109817802";
         //String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=manam&fbIds="+frindsIDs+"&UserFbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
@@ -259,6 +270,7 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
                                 movieReleaseDate = responseObject.optString("ReleaseDate");
                                 movieMusicDirector = responseObject.optString("MusicDirector");
                                 movieImage = responseObject.optString("MovieImage");
+                                movieCoverPic = responseObject.optString("WideImage");
 
                                 if (responseObject.has("Reviews")) {
                                     JSONArray jsonArray = responseObject.getJSONArray("Reviews");
@@ -316,7 +328,9 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
 
                                 }
                                 setMovieValues();
+                                setCoverPic(movieCoverPic);
                                 setImage(movieImage);
+//                                setProfilePic(movieImage);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -346,7 +360,17 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
                 new Response.Listener<Bitmap>() {
                     @Override
                     public void onResponse(Bitmap response) {
-                        movie_img.setImageBitmap(response);
+
+                        Bitmap mbitmap = response;
+                        Bitmap imageRounded = Bitmap.createBitmap(mbitmap.getWidth(), mbitmap.getHeight(), mbitmap.getConfig());
+                        Canvas canvas = new Canvas(imageRounded);
+                        Paint mpaint = new Paint();
+                        mpaint.setAntiAlias(true);
+                        mpaint.setShader(new BitmapShader(mbitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+                        canvas.drawRoundRect((new RectF(0, 0, mbitmap.getWidth(), mbitmap.getHeight())), 100, 100, mpaint);// Round Image Corner 100 100 100 100
+                        movie_img.setImageBitmap(imageRounded);
+
+//                        movie_img.setImageBitmap(response);
                         handler.postDelayed(new Runnable() {
                             public void run() {
                                 detailProgress.setVisibility(View.GONE);
@@ -460,5 +484,55 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         }
     }
 
+
+    public void setCoverPic(String url){
+        final Handler handler = new Handler();
+        ImageRequest imgRequest = new ImageRequest(url,
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        movie_cover.setImageBitmap(response);
+                        handler.postDelayed(new Runnable() {
+                            public void run() {
+                            }
+                        }, 1000);
+                    }
+                }, 0, 0, ImageView.ScaleType.FIT_XY, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                movie_cover.setBackgroundColor(Color.parseColor("#ff0000"));
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                    }
+                }, 500);
+                error.printStackTrace();
+
+            }
+        });
+        VolleySingleton.getInstance().addToRequestQueue(imgRequest);
+    }
+
+
+
+
+    public void setProfilePic(String url){
+        ImageRequest imgRequest = new ImageRequest(url,
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        movie_img.setImageBitmap(ImageHelper.getRoundedCornerBitmap(getActivity(), response, 150, 342, 513, true, true, true, true));
+                        detailProgress.setVisibility(View.GONE);
+
+                    }
+                }, 0, 0, ImageView.ScaleType.FIT_CENTER, Bitmap.Config.ARGB_8888, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                movie_img.setBackgroundColor(Color.parseColor("#ff0000"));
+                detailProgress.setVisibility(View.GONE);
+                error.printStackTrace();
+            }
+        });
+        VolleySingleton.getInstance().addToRequestQueue(imgRequest);
+    }
 
 }
