@@ -1,27 +1,66 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
+    android:background="@color/white"
     xmlns:card_view="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/FullScreenDialogToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:elevation="4dp"
+        android:gravity="center"
+        tools:targetApi="lollipop" >
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/review_by_user_toolbar_back"
+            card_view:srcCompat="@drawable/leftarrow"
+            android:background="@null"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/review_by_user_toolbar_name"
+            android:text="Name"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="18sp"/>
+    </android.support.v7.widget.Toolbar>
+
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="130dp"
+        android:layout_height="120dp"
         android:id="@+id/linear"
         android:background="#dfdfdf"
         android:orientation="horizontal">
+        <!--android:background="#dfdfdf"-->
 
+        <!--<jaffa.com.jaffareviews.Helpers.RoundedImageView-->
+        <!--android:id="@+id/review_by_user_image"-->
+        <!--android:layout_width="0dip"-->
+        <!--android:layout_height="fill_parent"-->
+        <!--android:layout_weight="20"-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:layout_marginBottom="10dp"-->
+        <!--android:scaleType="fitXY"-->
+        <!--card_view:cardElevation="4dp"-->
+        <!--android:elevation="10dp"-->
+        <!--android:src="@drawable/test2" />-->
 
-        <jaffa.com.jaffareviews.Helpers.RoundedImageView
+        <ImageView
             android:id="@+id/review_by_user_image"
             android:layout_width="0dip"
             android:layout_height="fill_parent"
             android:layout_weight="20"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:scaleType="fitXY"
-            card_view:cardElevation="4dp"
             android:elevation="10dp"
             android:src="@drawable/test2" />
 
@@ -30,6 +69,7 @@
             android:layout_height="fill_parent"
             android:layout_weight="50"
             android:layout_marginLeft="20dp"
+            android:background="#dfdfdf"
             android:orientation="vertical">
 
             <TextView
@@ -44,7 +84,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="7dp"
                 android:background="@drawable/reviews_by_user_outline">
                 <TextView
                     android:layout_width="match_parent"
@@ -63,7 +103,7 @@
                 android:id="@+id/review_by_user_since"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="7dp"
                 android:ellipsize="none"
                 android:maxLines="100"
                 android:scrollHorizontally="false"
@@ -73,11 +113,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dip"
-            android:layout_height="fill_parent"
-            android:layout_weight="20"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
             android:layout_marginRight="15dp"
             android:orientation="vertical"
             android:background="@drawable/layer_shadow">
@@ -85,7 +125,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="15dp"
                 android:maxLines="100"
                 android:id="@+id/review_by_user_follower_count"
                 android:text="6"
@@ -96,7 +136,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:maxLines="1"
                 android:text="Followers"
                 android:gravity="center"
@@ -112,16 +153,16 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <Button
+
+
+        <ImageButton
             android:id="@+id/review_by_user_followbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/leaderboard_card_follow_button"
-            android:drawableLeft="@android:drawable/ic_input_add"
-            android:elevation="10dp"
-            android:gravity="center"
-            android:text="Follow" />
+            android:minHeight="40dp"
+            android:minWidth="100dp"
+            android:background="@drawable/follow"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -143,6 +184,8 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/review_by_user_list"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

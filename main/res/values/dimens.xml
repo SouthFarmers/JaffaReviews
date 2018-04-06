@@ -5,7 +5,7 @@
 
     <dimen name="review_card_padding">60dp</dimen>
 
-
+    <dimen name="icon_size">18dp</dimen>
 
     <dimen name="screen_spacing_horizontal">16dp</dimen>
     <dimen name="screen_spacing_vertical">16dp</dimen>

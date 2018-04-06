@@ -133,27 +133,33 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-30dp"
+            android:layout_marginTop="-20dp"
             android:layout_below="@+id/linear">
             <TextView
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="6"
+                android:layout_weight="5"
                 />
-            <Button
+
+            <ImageButton
                 android:id="@+id/cardfollowbutton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:elevation="10dp"
-                android:background="@drawable/leaderboard_card_follow_button"
-                android:drawableLeft="@android:drawable/ic_input_add"
                 android:layout_weight="1"
-                android:text="Follow" />
+                android:minHeight="30dp"
+                android:background="@drawable/follow"/>
+
+            <!--<Button-->
+                <!--android:id="@+id/cardfollowbutton"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="1"-->
+                <!--android:background="@drawable/follow"/>-->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="6"
+                android:layout_weight="5"
                 />
         </LinearLayout>
 

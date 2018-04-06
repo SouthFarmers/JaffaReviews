@@ -76,4 +76,13 @@
         <item name="android:windowEnterAnimation">@anim/zoom_in</item>
         <item name="android:windowExitAnimation">@anim/zoom_out</item>
     </style>
+
+
+
+        <style name="StarRatingBar" parent="Theme.AppCompat">
+            <item name="colorControlNormal">@color/light_half_black</item>
+            <item name="colorControlActivated">@color/duskYellow</item>
+        </style>
+
+
 </resources>
