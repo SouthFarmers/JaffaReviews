@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
@@ -12,10 +13,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -44,13 +48,15 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by gautham on 11/16/17.
  */
 
-public class SettingsFragment extends Fragment implements CompoundButton.OnCheckedChangeListener {
+public class SettingsFragment extends Fragment implements CompoundButton.OnCheckedChangeListener , View.OnClickListener{
 
 
     private SettingsFragment.OnSettingsFragmentListener mListener;
-    private SwitchCompat notificationsSwitch, profileTypeSwitch;
+    private SwitchCompat notificationsSwitch;
+    private ImageButton profileType;
+    private Button save;
     private CheckBox friendsRatingCheckbox, criticsRatingCheckbox, releasingThisWeekCheckbox;
-    boolean profileTypeFlag, friendsRatingFlag, criticsRatingFlag, releasingThisWeekFlag;
+    boolean profileTypeFlag = false, friendsRatingFlag, criticsRatingFlag, releasingThisWeekFlag;
     String restoreduserid;
 
     public static SettingsFragment newInstance() {
@@ -98,21 +104,23 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
                              ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
-
+        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
         restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
         notificationsSwitch = (SwitchCompat) rootView.findViewById(R.id.notifications_switch);
-        profileTypeSwitch = (SwitchCompat) rootView.findViewById(R.id.profile_type_switch);
+        profileType = (ImageButton) rootView.findViewById(R.id.profile_type_switch);
         friendsRatingCheckbox = (CheckBox) rootView.findViewById(R.id.friends_ratings_checkbox);
         criticsRatingCheckbox = (CheckBox) rootView.findViewById(R.id.critic_ratings_checkbox);
         releasingThisWeekCheckbox = (CheckBox) rootView.findViewById(R.id.releasing_this_week_checkbox);
+        save = (Button) rootView.findViewById(R.id.save_settings);
 
 
         friendsRatingCheckbox.setOnCheckedChangeListener(this);
         criticsRatingCheckbox.setOnCheckedChangeListener(this);
         releasingThisWeekCheckbox.setOnCheckedChangeListener(this);
         notificationsSwitch.setOnCheckedChangeListener(this);
-        profileTypeSwitch.setOnCheckedChangeListener(this);
+        profileType.setOnClickListener(this);
+        save.setOnClickListener(this);
 
         getInitialSettings();
 
@@ -137,14 +145,28 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
             case R.id.releasing_this_week_checkbox:
                 releasingThisWeekFlag = isChecked;
                 break;
-            case R.id.profile_type_switch:
-                profileTypeFlag = isChecked;
-                break;
             case R.id.notifications_switch:
                 break;
         }
 
-        updateSettings();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.profile_type_switch:
+                if(profileTypeFlag){
+                    profileTypeFlag = false;
+                    profileType.setBackgroundResource(R.drawable.fanswitch);
+                }else{
+                    profileTypeFlag = true;
+                    profileType.setBackgroundResource(R.drawable.criticswitch);
+                }
+                break;
+            case R.id.save_settings:
+                updateSettings();
+                break;
+        }
     }
 
     public void getInitialSettings(){
@@ -164,7 +186,11 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
                             friendsRatingCheckbox.setChecked(friendsRatingFlag);
                             criticsRatingCheckbox.setChecked(criticsRatingFlag);
                             releasingThisWeekCheckbox.setChecked(releasingThisWeekFlag);
-                            profileTypeSwitch.setChecked(profileTypeFlag);
+                            if(profileTypeFlag){
+                                profileType.setBackgroundResource(R.drawable.criticswitch);
+                            }else{
+                                profileType.setBackgroundResource(R.drawable.fanswitch);
+                            }
 
                         } catch (JSONException e) {
 
@@ -206,7 +232,10 @@ public class SettingsFragment extends Fragment implements CompoundButton.OnCheck
 
                         try {
                             Boolean arrData = response.getBoolean("Data");
-                            if (!arrData) {
+                            if (arrData) {
+                                Toast.makeText(getActivity(), "Success!", Toast.LENGTH_SHORT);
+                            }else{
+                                Toast.makeText(getActivity(), "Something went wrong", Toast.LENGTH_SHORT);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

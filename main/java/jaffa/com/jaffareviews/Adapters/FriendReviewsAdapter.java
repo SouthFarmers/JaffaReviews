@@ -3,10 +3,12 @@ package jaffa.com.jaffareviews.Adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -15,10 +17,13 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
+import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jaffa.com.jaffareviews.Fragments.MovieDetailFragment;
+import jaffa.com.jaffareviews.POJO.MoviedetailReviewsPOJO;
 import jaffa.com.jaffareviews.R;
 import jaffa.com.jaffareviews.Volley.VolleySingleton;
 
@@ -30,20 +35,17 @@ public class FriendReviewsAdapter extends BaseAdapter implements View.OnClickLis
 
     Context mContext;
     private MovieDetailFragment.OnMovieDetailFragmentListener mListener;
-    private List<String> listRevfrnd_fbId, listRevfrnd_rating,listRevfrnd_revtext, listRevfrnd_revname;
+    private ArrayList<MoviedetailReviewsPOJO> list;
 
     private static class ViewHolder {
         TextView revtext;
         RatingBar revrating;
     }
 
-    public FriendReviewsAdapter(Context context, List<String> listRevfrnd_fbId, List<String> listRevfrnd_rating, List<String>listRevfrnd_revtext,List<String>listRevfrnd_revname) {
-        this.mContext=context;
-        this.mContext=context;
-        this.listRevfrnd_fbId = listRevfrnd_fbId;
-        this.listRevfrnd_rating = listRevfrnd_rating;
-        this.listRevfrnd_revtext = listRevfrnd_revtext;
-        this.listRevfrnd_revname = listRevfrnd_revname;
+    public FriendReviewsAdapter(Context context, ArrayList<MoviedetailReviewsPOJO> Data) {
+
+
+        list = Data;
         mListener = (MovieDetailFragment.OnMovieDetailFragmentListener) context;
 
 
@@ -51,14 +53,12 @@ public class FriendReviewsAdapter extends BaseAdapter implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-
-
     }
 
     @Override
     public int getCount() {
         // TODO Auto-generated method stub
-        return listRevfrnd_fbId.size();
+        return list.size();
     }
 
     @Override
@@ -78,7 +78,10 @@ public class FriendReviewsAdapter extends BaseAdapter implements View.OnClickLis
         TextView revtext;
         TextView revName;
         ImageView fb_img;
-        RatingBar revrating;
+        TextView revdate;
+        TextView revrating;
+        ImageView revGif, revReaction;
+        TextView revtag;
     }
 
 
@@ -93,16 +96,44 @@ public class FriendReviewsAdapter extends BaseAdapter implements View.OnClickLis
         holder.revtext = (TextView) rowView.findViewById(R.id.reviewer_text);
         holder.revName = (TextView) rowView.findViewById(R.id.reviewer_name);
         holder.fb_img = (ImageView) rowView.findViewById(R.id.fb_icon);
-        holder.revrating = (RatingBar) rowView.findViewById(R.id.reviewer_rating);
-        setImage("https://graph.facebook.com/"+listRevfrnd_fbId.get(position).toString()+"/picture?type=large&w‌​idth=100&height=150",holder);
+        holder.revrating = (TextView) rowView.findViewById(R.id.reviewer_rating) ;
+        holder.revdate = (TextView) rowView.findViewById(R.id.reviewer_date);
+        holder.revGif = (ImageView) rowView.findViewById(R.id.gifView);
+        holder.revtag = (TextView) rowView.findViewById(R.id.reviewer_tag);
+        holder.revReaction = (ImageView) rowView.findViewById(R.id.reviewer_reaction);
+        setImage("https://graph.facebook.com/"+list.get(position).getUserFBId()+"/picture?type=large&w‌​idth=100&height=150",holder);
 
-        holder.revtext.setText(listRevfrnd_revtext.get(position).toString());
-        holder.revName.setText(listRevfrnd_revname.get(position).toString());
-        holder.revrating.setRating(Float.parseFloat(listRevfrnd_rating.get(position).toString()));
+        if(Float.parseFloat(list.get(position).getUserRating()) > 2){
+            holder.revReaction.setImageResource(R.drawable.heart);
+        }else{
+            holder.revReaction.setImageResource(R.drawable.broken);
+        }
+        holder.revtext.setText(list.get(position).getUserReviewText());
+        holder.revName.setText(list.get(position).getUserName());
+        holder.revrating.setText(list.get(position).getUserRating()+"/5");
+        holder.revdate.setText(list.get(position).getUserReviewDate());
+        holder.revtag.setText("#"+list.get(position).getUserReviewtag());
+        if(list.get(position).getUserReviewGif().equalsIgnoreCase("") || list.get(position).getUserReviewGif().equalsIgnoreCase("null")) {
+            holder.revGif.setVisibility(View.GONE);
+        }else{
+            Glide.with(mContext)
+                    .load(list.get(position).getUserReviewGif())
+                    .into(holder.revGif);
+        }
+        if(list.get(position).getUserReviewText().equalsIgnoreCase("") || list.get(position).getUserReviewText().equalsIgnoreCase("null")){
+            holder.revtext.setVisibility(View.GONE);
+        }
+        if(list.get(position).getUserReviewtag().equalsIgnoreCase("") || list.get(position).getUserReviewtag().equalsIgnoreCase("null")){
+            holder.revtag.setVisibility(View.GONE);
+        }else if(list.get(position).getUserReviewtag().contains(",")){
+            String tags[] = list.get(position).getUserReviewtag().split(",");
+            holder.revtag.setText("#"+tags[0]+" "+ "#"+tags[1]);
+        }
 
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mListener.onReviewClick(list.get(position).getUserFBId());
             }
         });
 

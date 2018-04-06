@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.SearchView;
@@ -86,7 +87,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Se
     }
 
     public interface OnSearchFragmentListener {
-
+        void onSearchClick(String movieName, String movieID);
     }
 
     @Override
@@ -98,7 +99,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Se
                              ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
-
+        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
         searchview = (SearchView) rootView.findViewById(R.id.search);
         searchview.setOnQueryTextListener(this);
@@ -130,7 +131,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Se
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        System.out.print(newText);
         if(newText.length() > 2){
             SearchJaffa(newText);
         }
@@ -152,6 +152,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Se
                             JSONArray moviejsonArray = response.getJSONArray("movies");
                             for (int i = 0; i < moviejsonArray.length(); i++) {
                                 SearchResultMoviesPOJO searchMovies = new SearchResultMoviesPOJO();
+                                searchMovies.setMovieID(moviejsonArray.getJSONObject(i).optString("MovieID"));
                                 searchMovies.setMovieName(moviejsonArray.getJSONObject(i).optString("MovieName"));
                                 searchMovies.setAvgRating(moviejsonArray.getJSONObject(i).optString("AvgRating"));
                                 searchMovies.setNumRating(moviejsonArray.getJSONObject(i).optString("NumOfRatings"));
@@ -175,7 +176,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Se
                             LinearLayoutManager MyLayoutManager = new LinearLayoutManager(getActivity());
                             MyLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                             if (listSearchResultMovies.size() > 0 & searchMoviesRecyerView != null) {
-                                searchMoviesRecyerView.setAdapter(new SearchMoviesAdapter(listSearchResultMovies));
+                                searchMoviesRecyerView.setAdapter(new SearchMoviesAdapter(getActivity(), listSearchResultMovies));
                             }
                             searchMoviesRecyerView.setLayoutManager(MyLayoutManager);
 
@@ -183,7 +184,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, Se
                             LinearLayoutManager MyLayoutManager2 = new LinearLayoutManager(getActivity());
                             MyLayoutManager2.setOrientation(LinearLayoutManager.HORIZONTAL);
                             if (listSearchResultCritics.size() > 0 & searchCriticsRecyerView != null) {
-                                searchCriticsRecyerView.setAdapter(new LeaderBoardAdapter(getActivity(),listSearchResultCritics));
+                                searchCriticsRecyerView.setAdapter(new LeaderBoardAdapter(getActivity(),listSearchResultCritics, MainGridFragment.newInstance()));
                             }
                             searchCriticsRecyerView.setLayoutManager(MyLayoutManager2);
 

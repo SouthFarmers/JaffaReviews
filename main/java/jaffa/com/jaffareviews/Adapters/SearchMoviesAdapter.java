@@ -17,7 +17,9 @@ import com.android.volley.toolbox.ImageRequest;
 
 import java.util.ArrayList;
 
+import jaffa.com.jaffareviews.Fragments.ConnectionsFragment;
 import jaffa.com.jaffareviews.Fragments.MainGridFragment;
+import jaffa.com.jaffareviews.Fragments.SearchFragment;
 import jaffa.com.jaffareviews.POJO.SearchResultMoviesPOJO;
 import jaffa.com.jaffareviews.POJO.UpComingMoviesPOJO;
 import jaffa.com.jaffareviews.R;
@@ -30,11 +32,13 @@ import jaffa.com.jaffareviews.Volley.VolleySingleton;
 public class SearchMoviesAdapter extends RecyclerView.Adapter<SearchMoviesAdapter.MyViewHolder> {
 
     private ArrayList<SearchResultMoviesPOJO> list;
+    private SearchFragment.OnSearchFragmentListener mListener;
     TextView movie_title, reviewcount;
-    ImageView movie_image;
-    RatingBar avgrating;
+    ImageView movie_image, ratingimage;
+    TextView avgrating;
 
-    public SearchMoviesAdapter(ArrayList<SearchResultMoviesPOJO> Data) {
+    public SearchMoviesAdapter(Context context, ArrayList<SearchResultMoviesPOJO> Data) {
+        mListener = (SearchFragment.OnSearchFragmentListener) context;
         list = Data;
     }
 
@@ -48,8 +52,9 @@ public class SearchMoviesAdapter extends RecyclerView.Adapter<SearchMoviesAdapte
             mView = view;
             movie_image = (ImageView) view.findViewById(R.id.search_movie_image);
             movie_title = (TextView) view.findViewById(R.id.search_movie_name);
-            avgrating = (RatingBar) view.findViewById(R.id.search_movie_rating);
+            avgrating = (TextView) view.findViewById(R.id.search_movie_rating);
             reviewcount = (TextView) view.findViewById(R.id.search_movie_reviews_count);
+            ratingimage= (ImageView) view.findViewById(R.id.search_rating_image);
         }
     }
 
@@ -67,8 +72,25 @@ public class SearchMoviesAdapter extends RecyclerView.Adapter<SearchMoviesAdapte
 
         setImage(list.get(position).getMovieImage(),movie_image );
         movie_title.setText(list.get(position).getMovieName());
-        reviewcount.setText(list.get(position).getNumRating()+" reviews");
-        avgrating.setRating(Float.parseFloat(list.get(position).getAvgRating()));
+        reviewcount.setText(list.get(position).getNumRating()+" user reviews");
+        if(list.get(position).getAvgRating().equalsIgnoreCase("0")) {
+            avgrating.setText("---");
+            ratingimage.setVisibility(View.INVISIBLE);
+        }else{
+            avgrating.setText(list.get(position).getAvgRating() + " %");
+            if (Integer.parseInt(list.get(position).getAvgRating()) > 60) {
+                ratingimage.setImageResource(R.drawable.heart);
+            } else {
+                ratingimage.setImageResource(R.drawable.broken);
+            }
+        }
+
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onSearchClick(list.get(position).getMovieName(), list.get(position).getMovieID());
+            }
+        });
 
 
     }

@@ -1,6 +1,7 @@
 package jaffa.com.jaffareviews.Adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +24,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -31,6 +34,8 @@ import jaffa.com.jaffareviews.POJO.leaderboard;
 import jaffa.com.jaffareviews.R;
 import jaffa.com.jaffareviews.Volley.VolleySingleton;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by gautham on 11/14/17.
  */
@@ -39,15 +44,21 @@ public class LeaderBoardAdapter extends RecyclerView.Adapter<LeaderBoardAdapter.
 
     private Context mContext;
     private MainGridFragment.OnMainGridFragmentListener mListener;
+    private MainGridFragment maingridfragment;
     private ArrayList<leaderboard> list;
-    TextView titleTextView,followersTextView,ratingsTextView,followbutton;
+    TextView titleTextView,followersTextView,ratingsTextView;
+    ImageButton followbutton;
     boolean isFollowing;
+    private String restoreduserid;
     public ImageView coverImageView;
 
-    public LeaderBoardAdapter(Context context, ArrayList<leaderboard> Data) {
+    public LeaderBoardAdapter(Context context, ArrayList<leaderboard> Data, MainGridFragment fragment) {
         mContext = context;
+        maingridfragment = fragment;
         mListener = (MainGridFragment.OnMainGridFragmentListener) context;
         list = Data;
+        SharedPreferences prefs = context.getSharedPreferences("UserFbID", MODE_PRIVATE);
+        restoreduserid = prefs.getString("UserFbID", null);
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -63,7 +74,7 @@ public class LeaderBoardAdapter extends RecyclerView.Adapter<LeaderBoardAdapter.
             coverImageView = (ImageView) view.findViewById(R.id.cardrank);
             followersTextView = (TextView) view.findViewById(R.id.cardfollowers);
             ratingsTextView = (TextView) view.findViewById(R.id.cardreviews);
-            followbutton = (Button) view.findViewById(R.id.cardfollowbutton);
+            followbutton = (ImageButton) view.findViewById(R.id.cardfollowbutton);
         }
     }
 
@@ -84,20 +95,26 @@ public class LeaderBoardAdapter extends RecyclerView.Adapter<LeaderBoardAdapter.
         followersTextView.setText(list.get(position).getFollowers());
         ratingsTextView.setText(list.get(position).getRatings());
         if(list.get(position).isFollowing()){
-            followbutton.setText("following");
+            followbutton.setBackgroundResource(R.drawable.following);
             isFollowing = true;
 
         }else{
-            followbutton.setText("follow");
             isFollowing = false;
         }
+
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onLeaderBoadClick(list.get(position).getFbid());
+            }
+        });
 
         followbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!isFollowing) {
-//                    FollowUser(restoreduserid, list.get(position).getFbid());
-                    followbutton.setText("following");
+                    FollowUser(restoreduserid, list.get(position).getFbid());
+//                    followbutton.setBackgroundResource(R.drawable.following);
                 }
             }
         });
@@ -107,6 +124,16 @@ public class LeaderBoardAdapter extends RecyclerView.Adapter<LeaderBoardAdapter.
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     public static float dpToPixels(int dp, Context context) {
@@ -148,12 +175,17 @@ public class LeaderBoardAdapter extends RecyclerView.Adapter<LeaderBoardAdapter.
                 new Response.Listener<JSONObject>(){
                     @Override
                     public void onResponse(JSONObject response) {
-                        //cardfollowbutton.setText("Following");
-//                        try {
-//                            //JSONArray arrData = response.getJSONArray("data");
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
+                        try {
+                            Boolean arrData = response.getBoolean("Data");
+                            if (arrData) {
+                            maingridfragment.loadLeaderboard();
+//                                Toast.makeText(mContext, "Success!", Toast.LENGTH_SHORT);
+                            }else{
+//                                Toast.makeText(mContext, "Something went wrong", Toast.LENGTH_SHORT);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 new Response.ErrorListener(){

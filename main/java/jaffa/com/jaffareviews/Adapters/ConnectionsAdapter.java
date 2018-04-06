@@ -82,11 +82,22 @@ public class ConnectionsAdapter extends RecyclerView.Adapter<ConnectionsAdapter.
         return list.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
     public static float dpToPixels(int dp, Context context) {
         return dp * (context.getResources().getDisplayMetrics().density);
     }
 
     public void setImage(String url, final ConnectionsAdapter.MyViewHolder holder){
+        String asd  = url;
         ImageRequest imgRequest = new ImageRequest(url,
                 new Response.Listener<Bitmap>() {
                     @Override

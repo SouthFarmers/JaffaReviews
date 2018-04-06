@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +33,7 @@ import jaffa.com.jaffareviews.Adapters.LeaderBoardAdapter;
 import jaffa.com.jaffareviews.Adapters.UpComingMoviesAdapter;
 import jaffa.com.jaffareviews.LeaderBoardCards.CardFragmentPagerAdapter;
 import jaffa.com.jaffareviews.LeaderBoardCards.ShadowTransformer;
+import jaffa.com.jaffareviews.POJO.MovieDetailPOJO;
 import jaffa.com.jaffareviews.POJO.UpComingMoviesPOJO;
 import jaffa.com.jaffareviews.POJO.leaderboard;
 import jaffa.com.jaffareviews.R;
@@ -54,13 +56,8 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
     RecyclerView MyRecyclerView, upcomingRecyclerview;
     LoadingView progress;
     FireworkyPullToRefreshLayout mPullToRefresh;
-    private CardFragmentPagerAdapter mFragmentCardAdapter;
-    private ShadowTransformer mFragmentCardShadowTransformer;
-    private int numberofleaders;
-    private static List<String> listMovieTitle, listMovieRating, leaderboardname,leaderboardfollowers,leaderboardratings,leaderboardfbId;
-    private static List<Boolean> leaderboardisfollowing;
+    private static List<String> listMovieTitle, listMovieRating, listMovieImage,listMovieFriendRatingCount,listMovieCriticRatingCount;
     String restoreduserid;
-    boolean isFollowing;
 
 
     public static MainGridFragment newInstance() {
@@ -101,7 +98,8 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
     }
 
     public interface OnMainGridFragmentListener {
-        void onMovieClick(String title);
+        void onMovieClick(String title, String movieid);
+        void onLeaderBoadClick(String FbID);
     }
 
     @Override
@@ -113,10 +111,9 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
                              ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.main_grid_fragment, container, false);
-
+        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
         restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
-
         progress = (LoadingView) rootView.findViewById(R.id.main_progress);
         mPullToRefresh = (FireworkyPullToRefreshLayout) rootView.findViewById(R.id.pullToRefresh);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.main_list);
@@ -154,6 +151,10 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
                         try {
                             listMovieTitle = new ArrayList<String>();
                             listMovieRating = new ArrayList<String>();
+                            listMovieImage = new ArrayList<String>();
+                            listMovieFriendRatingCount = new ArrayList<String>();
+                            listMovieCriticRatingCount = new ArrayList<String>();
+                            ArrayList<MovieDetailPOJO> MovieDetailslistitems = new ArrayList<>();
 
 
                             if (response.has("movies")) {
@@ -162,12 +163,18 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
                                 for (int i = 0; i < jsonArray.length(); i++) {
 
                                     if (jsonArray.getJSONObject(i).has("MovieName")) {
-                                        listMovieTitle.add(i, (jsonArray.getJSONObject(i).optString("MovieName")));
-                                        listMovieRating.add(i, (jsonArray.getJSONObject(i).optString("AvgRating")));
+                                        MovieDetailPOJO moviedetails = new MovieDetailPOJO();
+                                        moviedetails.setMovieTitle(jsonArray.getJSONObject(i).optString("MovieName"));
+                                        moviedetails.setMovieID(jsonArray.getJSONObject(i).optString("MovieID"));
+                                        moviedetails.setAvgRating(jsonArray.getJSONObject(i).optString("AvgRating"));
+                                        moviedetails.setMovieImage(jsonArray.getJSONObject(i).optString("MovieImage"));
+                                        moviedetails.setFriendRatingCount(jsonArray.getJSONObject(i).optString("NumFriendRatings"));
+                                        moviedetails.setCriticRatingCount(jsonArray.getJSONObject(i).optString("NumCriticRatings"));
+                                        MovieDetailslistitems.add(moviedetails);
                                     }
                                 }
                             }
-                            mainadapter = new GridViewAdapter(getActivity(), listMovieTitle,listMovieRating);
+                            mainadapter = new GridViewAdapter(getActivity(), MovieDetailslistitems);
                             recyclerView.setAdapter(mainadapter);
 
                             recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -243,7 +250,7 @@ public class MainGridFragment extends Fragment implements View.OnClickListener {
                             LinearLayoutManager MyLayoutManager = new LinearLayoutManager(getActivity());
                             MyLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
                             if (listitems.size() > 0 & MyRecyclerView != null) {
-                                MyRecyclerView.setAdapter(new LeaderBoardAdapter(getActivity(),listitems));
+                                MyRecyclerView.setAdapter(new LeaderBoardAdapter(getActivity(),listitems, MainGridFragment.this));
                             }
                             MyRecyclerView.setLayoutManager(MyLayoutManager);
 

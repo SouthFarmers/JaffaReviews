@@ -57,10 +57,10 @@ public class SplashActivity extends AppCompatActivity{
         FacebookSdk.setIsDebugEnabled(true);
         FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
-        TwitterConfig config = new TwitterConfig.Builder(this)
-                .twitterAuthConfig(new TwitterAuthConfig(Constants.TWITTER_CONSUMER_KEY, Constants.TWITTER_CONSUMER_SECRET))
-                .build();
-        Twitter.initialize(config);
+//        TwitterConfig config = new TwitterConfig.Builder(this)
+//                .twitterAuthConfig(new TwitterAuthConfig(Constants.TWITTER_CONSUMER_KEY, Constants.TWITTER_CONSUMER_SECRET))
+//                .build();
+//        Twitter.initialize(config);
 
         setContentView(R.layout.activity_splash);
         splashProgress = (LoadingView) findViewById(R.id.splash_progress);

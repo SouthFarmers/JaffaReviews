@@ -6,11 +6,20 @@ package jaffa.com.jaffareviews.POJO;
 
 public class SearchResultMoviesPOJO {
 
+    String movieID;
     String movieName;
     String avgRating;
     String numRating;
     String releaseDate;
     String movieImage;
+
+    public String getMovieID() {
+        return movieID;
+    }
+
+    public void setMovieID(String movieID) {
+        this.movieID = movieID;
+    }
 
     public String getMovieName() {
         return movieName;

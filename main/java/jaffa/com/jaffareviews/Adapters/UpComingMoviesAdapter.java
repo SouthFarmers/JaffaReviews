@@ -14,7 +14,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
 import jaffa.com.jaffareviews.Fragments.MainGridFragment;
 import jaffa.com.jaffareviews.POJO.UpComingMoviesPOJO;
@@ -28,7 +34,7 @@ import jaffa.com.jaffareviews.Volley.VolleySingleton;
 public class UpComingMoviesAdapter extends RecyclerView.Adapter<UpComingMoviesAdapter.MyViewHolder> {
 
     private ArrayList<UpComingMoviesPOJO> list;
-    TextView movie_title;
+    TextView movie_title, release_date;
     ImageView movie_image;
 
     public UpComingMoviesAdapter(ArrayList<UpComingMoviesPOJO> Data) {
@@ -45,6 +51,8 @@ public class UpComingMoviesAdapter extends RecyclerView.Adapter<UpComingMoviesAd
             mView = view;
             movie_image = (ImageView) view.findViewById(R.id.upcoming_movie_image);
             movie_title = (TextView) view.findViewById(R.id.upcoming_movie_title);
+            release_date = (TextView) view.findViewById(R.id.release_date);
+
         }
     }
 
@@ -62,6 +70,16 @@ public class UpComingMoviesAdapter extends RecyclerView.Adapter<UpComingMoviesAd
 
         setImage(list.get(position).getMovieImage(),movie_image );
         movie_title.setText(list.get(position).getMovieName());
+        Calendar mydate = new GregorianCalendar();
+        Date thedate = null;
+        try {
+            thedate = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).parse(list.get(position).getMovieReleaseDate());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        mydate.setTime(thedate);
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd");
+        release_date.setText(formatter.format(mydate.getTime()));
 
     }
 
@@ -89,6 +107,16 @@ public class UpComingMoviesAdapter extends RecyclerView.Adapter<UpComingMoviesAd
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     public static float dpToPixels(int dp, Context context) {

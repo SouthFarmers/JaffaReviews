@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,24 +12,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-import com.twitter.sdk.android.core.Twitter;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
-import com.twitter.sdk.android.core.TwitterConfig;
-
+import jaffa.com.jaffareviews.Fragments.AddRatingFragment;
 import jaffa.com.jaffareviews.Fragments.ConnectionsFragment;
 import jaffa.com.jaffareviews.Fragments.MainGridFragment;
 import jaffa.com.jaffareviews.Fragments.MovieDetailFragment;
 import jaffa.com.jaffareviews.Fragments.ProfileFragment;
+import jaffa.com.jaffareviews.Fragments.ProfileFragmentOld;
 import jaffa.com.jaffareviews.Fragments.ReviewsByUserFragment;
 import jaffa.com.jaffareviews.Fragments.SearchFragment;
 import jaffa.com.jaffareviews.Fragments.SettingsFragment;
 import jaffa.com.jaffareviews.FullScreenDialog.FullScreenDialogFragment;
-import jaffa.com.jaffareviews.Helpers.AnalyticsApplication;
-import jaffa.com.jaffareviews.Helpers.Constants;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -38,14 +32,14 @@ public class MainActivity extends AppCompatActivity
         SettingsFragment.OnSettingsFragmentListener,
         ConnectionsFragment.OnConnectionsFragmentListener,
         ReviewsByUserFragment.OnReviewsByUserFragmentListener,
-        FullScreenDialogFragment.OnDiscardListener{
+        ProfileFragment.OnProfileFragmentListener,
+        AddRatingFragment.OnAddRatingFragmentListener{
 
     private TextView mTextMessage;
     private Toolbar toolbar;
     private TextView mToolBarTitle;
     private ImageButton mToolbar_profile, mToolbar_info;
 //    private static Tracker mTracker;
-    private FullScreenDialogFragment dialogFragment;
     final String dialogTag = "dialog";
     private Context context;
 
@@ -104,26 +98,13 @@ public class MainActivity extends AppCompatActivity
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        dialogFragment =
-                (FullScreenDialogFragment) getSupportFragmentManager().findFragmentByTag(dialogTag);
-        if (dialogFragment != null) {
-            dialogFragment.setOnDiscardListener(this);
-        }
-
         mToolbar_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                final Bundle args = new Bundle();
-                args.putString(ProfileFragment.EXTRA_NAME, "");
-
-                dialogFragment = new FullScreenDialogFragment.Builder(MainActivity.this)
-                        .setOnDiscardListener(MainActivity.this)
-                        .setContent(ProfileFragment.class, args)
-                        .setFullScreen(true)
-                        .build();
-
-                dialogFragment.show(getSupportFragmentManager(), dialogTag);
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.mainlist_fragment, ProfileFragment.newInstance());
+                ft.addToBackStack(null);
+                ft.commit();
             }
         });
     }
@@ -135,13 +116,33 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMovieClick(String title) {
-        launchMovieDetailFragment(title);
+    public void onMovieClick(String title, String movieid) {
+        launchMovieDetailFragment(title, movieid);
+    }
+
+    @Override
+    public  void onMyReviewClick(String fbID){
+        launchReviewByUserFragment(fbID);
     }
 
     @Override
     public  void onConnectionClick(String fbID){
         launchReviewByUserFragment(fbID);
+    }
+
+    @Override
+    public  void onReviewClick(String fbID){
+        launchReviewByUserFragment(fbID);
+    }
+
+    @Override
+    public  void onLeaderBoadClick(String fbID){
+        launchReviewByUserFragment(fbID);
+    }
+
+    @Override
+    public  void onSearchClick(String movieName, String movieid){
+        launchMovieDetailFragment(movieName,movieid);
     }
 
     private void launchMainGridFragment() {
@@ -151,15 +152,9 @@ public class MainActivity extends AppCompatActivity
         ft.commit();
     }
 
-    private void launchMovieDetailFragment(String title) {
-
-//        mTracker.send(new HitBuilders.EventBuilder()
-//                .setCategory("Action")
-//                .setAction("Share")
-//                .build());
-
+    private void launchMovieDetailFragment(String title, String movieid) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.mainlist_fragment, MovieDetailFragment.newInstance(title));
+        ft.replace(R.id.mainlist_fragment, MovieDetailFragment.newInstance(title, movieid));
         ft.addToBackStack(null);
         ft.commit();
     }
@@ -190,10 +185,5 @@ public class MainActivity extends AppCompatActivity
         ft.replace(R.id.mainlist_fragment, ReviewsByUserFragment.newInstance(fbID));
         ft.addToBackStack(null);
         ft.commit();
-    }
-
-    @Override
-    public void onDiscard() {
-        Toast.makeText(MainActivity.this, "closed", Toast.LENGTH_SHORT).show();
     }
 }

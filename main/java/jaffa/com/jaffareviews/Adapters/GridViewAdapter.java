@@ -14,9 +14,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jaffa.com.jaffareviews.Fragments.MainGridFragment;
+import jaffa.com.jaffareviews.POJO.MovieDetailPOJO;
 import jaffa.com.jaffareviews.R;
 import jaffa.com.jaffareviews.Volley.VolleySingleton;
 
@@ -28,14 +30,13 @@ public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.MyView
 
     private Context mContext;
     private MainGridFragment.OnMainGridFragmentListener mListener;
-    private List<String> title, rating,director;
-    TextView movie_title, movie_rating;
+    TextView movie_title, movie_rating, friend_rating_count, critic_rating_count;
     ImageView movie_image,ratingimage;
+    ArrayList<MovieDetailPOJO> list;
 
-    public GridViewAdapter(Context context,List<String> title,List<String> rating) {
+    public GridViewAdapter(Context context, ArrayList<MovieDetailPOJO> data) {
         mContext = context;
-        this.title = title;
-        this.rating = rating;
+        this.list = data;
         mListener = (MainGridFragment.OnMainGridFragmentListener) context;
 
     }
@@ -53,6 +54,8 @@ public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.MyView
             movie_title = (TextView) view.findViewById(R.id.grid_movie_title);
             movie_rating = (TextView) view.findViewById(R.id.grid_movie_rating);
             ratingimage = (ImageView) view.findViewById(R.id.ratingimage);
+            friend_rating_count = (TextView) view.findViewById(R.id.friend_rating_count);
+            critic_rating_count = (TextView) view.findViewById(R.id.critic_rating_count);
         }
     }
 
@@ -68,10 +71,12 @@ public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.MyView
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
 
-        setImage(title.get(position).toString(),movie_image );
-        movie_title.setText(title.get(position).toString());
-        movie_rating.setText(rating.get(position).toString()+" %");
-        if(Integer.parseInt(rating.get(position).toString()) > 60){
+        setImage(list.get(position).getMovieImage(),movie_image );
+        movie_title.setText(list.get(position).getMovieTitle());
+        friend_rating_count.setText(list.get(position).getFriendRatingCount());
+        critic_rating_count.setText(list.get(position).getCriticRatingCount());
+        movie_rating.setText(list.get(position).getAvgRating()+" %");
+        if(Integer.parseInt(list.get(position).getAvgRating()) > 60){
             ratingimage.setImageResource(R.drawable.heart);
         }else{
             ratingimage.setImageResource(R.drawable.broken);
@@ -82,15 +87,13 @@ public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.MyView
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.onMovieClick(title.get(position).toString());
+                mListener.onMovieClick(list.get(position).getMovieTitle(), list.get(position).getMovieID());
             }
         });
 
     }
 
-    public void setImage(String title,final  ImageView movie_img){
-
-        String url = "http://jaffareviews.com/Images/Movies/"+title+"/Movie.jpg";
+    public void setImage(String url,final  ImageView movie_img){
         ImageRequest imgRequest = new ImageRequest(url,
                 new Response.Listener<Bitmap>() {
                     @Override
@@ -112,7 +115,7 @@ public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.MyView
 
     @Override
     public int getItemCount() {
-        return title.size();
+        return list.size();
     }
 
     public static float dpToPixels(int dp, Context context) {

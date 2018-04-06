@@ -6,42 +6,42 @@ package jaffa.com.jaffareviews.POJO;
 
 public class ReviewsByUserPOJO {
 
-    String MovieImage;
-    String Moviename;
+    String MovieName;
+    String MovieTag;
     String MovieRating;
-    String ReleaseDate;
+    String MovieGif;
     String Review;
 
-    public String getMovieImage() {
-        return MovieImage;
+    public String getMovieTag() {
+        return MovieTag;
     }
 
-    public void setMovieImage(String movieImage) {
-        MovieImage = movieImage;
+    public void setMovieTag(String Movietag) {
+        MovieTag = Movietag;
     }
 
-    public String getMoviename() {
-        return Moviename;
+    public String getMovieName() {
+        return MovieName;
     }
 
-    public void setMoviename(String moviename) {
-        Moviename = moviename;
+    public void setMovieName(String Moviename) {
+        MovieName = Moviename;
     }
 
     public String getMovieRating() {
         return MovieRating;
     }
 
-    public void setMovieRating(String movieRating) {
-        MovieRating = movieRating;
+    public void setMovieRating(String movierating) {
+        MovieRating = movierating;
     }
 
-    public String getReleaseDate() {
-        return ReleaseDate;
+    public String getMovieGif() {
+        return MovieGif;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        ReleaseDate = releaseDate;
+    public void setRMovieGif(String Moviegif) {
+        MovieGif = Moviegif;
     }
 
     public String getReview() {

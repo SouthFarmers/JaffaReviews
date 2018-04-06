@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
@@ -92,7 +93,7 @@ public class ConnectionsFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_connections, container, false);
-
+        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.shared_pref_FbID), MODE_PRIVATE);
         restoreduserid = prefs.getString(getString(R.string.shared_pref_FbID), null);
 
@@ -109,8 +110,7 @@ public class ConnectionsFragment extends Fragment {
         Spannable spannable2 = (Spannable) connectionsCriticsLabel.getText();
         spannable2.setSpan(new StrikethroughSpan(), 3, 8, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        getCriticsConnections();
-        getFriendsConnections();
+        getConnections();
         return rootView;
     }
 
@@ -119,7 +119,7 @@ public class ConnectionsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    public void getCriticsConnections(){
+    public void getConnections(){
         String url ="http://jaffareviews.com/api/Movie/GetConnections?fbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
@@ -128,31 +128,43 @@ public class ConnectionsFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         try {
 
-                            ArrayList<leaderboard> listitems = new ArrayList<>();
+                            ArrayList<leaderboard> friendslistitems = new ArrayList<>();
+                            ArrayList<leaderboard> criticslistitems = new ArrayList<>();
 
-                            JSONArray jsonArray = response.getJSONArray("critics");
+                            JSONArray jsonArray = response.getJSONArray("connections");
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                if(restoreduserid.equalsIgnoreCase(jsonArray.getJSONObject(i).optString("fbID"))) {
 
+                                if (jsonArray.getJSONObject(i).optString("IsFriend").equalsIgnoreCase("true")) {
+                                    leaderboard friends_connections = new leaderboard();
+                                    friends_connections.setName((jsonArray.getJSONObject(i).optString("FirstName")) + " " + (jsonArray.getJSONObject(i).optString("LastName")));
+                                    friends_connections.setFbid((jsonArray.getJSONObject(i).optString("fbID")));
+                                    friendslistitems.add(friends_connections);
                                 }else{
-                                    leaderboard lboard = new leaderboard();
-                                    lboard.setName((jsonArray.getJSONObject(i).optString("FirstName")) + " " + (jsonArray.getJSONObject(i).optString("LastName")));
-                                    lboard.setFollowers((jsonArray.getJSONObject(i).optString("NumOfFollowers")));
-                                    lboard.setRatings((jsonArray.getJSONObject(i).optString("NumOfRatings")));
-                                    lboard.setFbid((jsonArray.getJSONObject(i).optString("fbID")));
-                                    lboard.setFollowing((jsonArray.getJSONObject(i).optBoolean("IsFollowing")));
-                                    listitems.add(lboard);
+                                    leaderboard critics_connections = new leaderboard();
+                                    critics_connections.setName((jsonArray.getJSONObject(i).optString("FirstName")) + " " + (jsonArray.getJSONObject(i).optString("LastName")));
+                                    critics_connections.setFbid((jsonArray.getJSONObject(i).optString("fbID")));
+                                    criticslistitems.add(critics_connections);
+
                                 }
+
                             }
 
 
                             connectionsCriticsRecyerView.setHasFixedSize(true);
                             LinearLayoutManager MyLayoutManager = new LinearLayoutManager(getActivity());
                             MyLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-                            if (listitems.size() > 0 & connectionsCriticsRecyerView != null) {
-                                connectionsCriticsRecyerView.setAdapter(new ConnectionsAdapter(getActivity(),listitems));
+                            if (criticslistitems.size() > 0 & connectionsCriticsRecyerView != null) {
+                                connectionsCriticsRecyerView.setAdapter(new ConnectionsAdapter(getActivity(),criticslistitems));
                             }
                             connectionsCriticsRecyerView.setLayoutManager(MyLayoutManager);
+
+                            connectionsFriendsRecyerView.setHasFixedSize(true);
+                            LinearLayoutManager MyLayoutManager2 = new LinearLayoutManager(getActivity());
+                            MyLayoutManager2.setOrientation(LinearLayoutManager.HORIZONTAL);
+                            if (friendslistitems.size() > 0 & connectionsFriendsRecyerView != null) {
+                                connectionsFriendsRecyerView.setAdapter(new ConnectionsAdapter(getActivity(),friendslistitems));
+                            }
+                            connectionsFriendsRecyerView.setLayoutManager(MyLayoutManager2);
 
                         } catch (JSONException e) {
 
@@ -170,41 +182,4 @@ public class ConnectionsFragment extends Fragment {
         VolleySingleton.getInstance().addToRequestQueue(jsonRequest);
     }
 
-    public void getFriendsConnections(){
-        GraphRequest request= GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONArrayCallback() {
-
-            @Override
-            public void onCompleted(JSONArray objects, GraphResponse response) {
-                // TODO Auto-generated method stub
-                try
-                {
-                    ArrayList<leaderboard> listfriends = new ArrayList<>();
-                    leaderboard lboard = new leaderboard();
-                    JSONArray raw = response.getJSONObject().getJSONArray("data");
-                    for(int x=0;x<objects.length();x++){
-                        lboard.setName(raw.getJSONObject(x).getString("name"));
-                        lboard.setFbid(raw.getJSONObject(x).getString("id"));
-                        listfriends.add(lboard);
-                    }
-
-                    connectionsFriendsRecyerView.setHasFixedSize(true);
-                    LinearLayoutManager MyLayoutManager = new LinearLayoutManager(getActivity());
-                    MyLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-                    if (listfriends.size() > 0 & connectionsFriendsRecyerView != null) {
-                        connectionsFriendsRecyerView.setAdapter(new ConnectionsAdapter(getActivity(),listfriends));
-                    }
-                    connectionsFriendsRecyerView.setLayoutManager(MyLayoutManager);
-
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        });
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,installed");
-        request.setParameters(parameters);
-        request.executeAsync();
-
-    }
 }

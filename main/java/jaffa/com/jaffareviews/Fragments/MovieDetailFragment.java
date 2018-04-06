@@ -16,8 +16,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,8 +28,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +70,8 @@ import jaffa.com.jaffareviews.Adapters.FriendReviewsAdapter;
 import jaffa.com.jaffareviews.Adapters.OthersReviewsAdapter;
 import jaffa.com.jaffareviews.Helpers.ExpandedListView;
 import jaffa.com.jaffareviews.Helpers.ImageHelper;
+import jaffa.com.jaffareviews.Helpers.NonScrollListView;
+import jaffa.com.jaffareviews.POJO.MoviedetailReviewsPOJO;
 import jaffa.com.jaffareviews.R;
 import jaffa.com.jaffareviews.Volley.VolleySingleton;
 
@@ -75,34 +84,32 @@ import static android.content.Context.MODE_PRIVATE;
 public class MovieDetailFragment extends ListFragment implements View.OnClickListener {
 
     private static final String movie_NAME = "prop_name";
-    private String movieName, movieDirector, movieRating, movieReleaseDate, movieMusicDirector, movieImage, movieID, numberofreviews, movieCoverPic;
+    private String movieName, movieDirector, movieRating, movieReleaseDate, movieMusicDirector, movieImage, movieID, numberofreviews, movieCoverPic, movieCast;
     private OnMovieDetailFragmentListener mListener;
-    TextView movie_name, movie_director, movie_rating, movie_releasedate, movie_musicdirector, movie_title, numof_reiews;
+    TextView movie_name, movie_director, movie_rating, movie_releasedate, movie_musicdirector, movie_title, numof_reiews, movie_cast;
     ImageView movie_img, movie_cover;
     private String friendsIDs = "friendsIDs";
     String frindsIDs = "";
-    private static List<String> listRevfrnd_fbId, listRevfrnd_rating, listRevfrnd_revtext, listRevfrnd_revname,
-            listRevcritic_fbId, listRevcritic_rating, listRevcritic_revtext, listRevcritic_revname,
-            listRevother_fbId, listRevother_rating, listRevother_revtext, listRevother_revname;
-    ExpandedListView frndrevlistView, criticrevlistview, otherlistview;
+    NonScrollListView frndrevlistView, criticrevlistview;
     static FriendReviewsAdapter frndsrevadapter;
     static CriticReviewsAdapter criticrevadapter;
-    static OthersReviewsAdapter othersrevadapter;
     LoadingView detailProgress;
     View view;
     String restoreduserid;
+    Button addRating ;
+    boolean hasMyrating;
+    LinearLayout backbutton;
     //RotationRatingBar rotationRatingBar;
 
-    final List<String> handles = Arrays.asList("ericfrohnhoefer", "benward", "vam_si");
-    final FilterValues filterValues = new FilterValues(null, null, handles, null); // or load from JSON, XML, etc
-    final TimelineFilter timelineFilter = new BasicTimelineFilter(filterValues, Locale.ENGLISH);
+//    final List<String> handles = Arrays.asList("ericfrohnhoefer", "benward", "vam_si");
+//    final FilterValues filterValues = new FilterValues(null, null, handles, null); // or load from JSON, XML, etc
+//    final TimelineFilter timelineFilter = new BasicTimelineFilter(filterValues, Locale.ENGLISH);
 
-    public MovieDetailFragment() {
-    }
 
-    public static MovieDetailFragment newInstance(String title) {
+    public static MovieDetailFragment newInstance(String title, String movieID) {
         Bundle args = new Bundle();
         args.putString(movie_NAME, title);
+        args.putString("MovieID", movieID);
         MovieDetailFragment fragment = new MovieDetailFragment();
         fragment.setArguments(args);
         return fragment;
@@ -121,22 +128,59 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
 
         if (getArguments() != null) {
             movieName = getArguments().getString(movie_NAME);
+            movieID = getArguments().getString("MovieID");
         }
-        moviedetailsvolley();
-        // ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
-        final SearchTimeline searchTimeline = new SearchTimeline.Builder()
-                .query("#" + movieName.replaceAll("\\s+", ""))
-                .resultType(SearchTimeline.ResultType.POPULAR)
-                .languageCode(Locale.ENGLISH.getLanguage())
-                .build();
-        final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(getActivity())
-                .setTimeline(searchTimeline)
-                .build();
-        setListAdapter(adapter);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+
+//        final SearchTimeline searchTimeline = new SearchTimeline.Builder()
+//                .query("#" + movieName.replaceAll("\\s+", ""))
+//                .resultType(SearchTimeline.ResultType.POPULAR)
+//                .languageCode(Locale.ENGLISH.getLanguage())
+//                .build();
+//        final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(getActivity())
+//                .setTimeline(searchTimeline)
+//                .build();
+//        setListAdapter(adapter);
 
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+//         ((MainActivity) getActivity()).getToolbar().hideOverflowMenu();
+
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnMovieDetailFragmentListener) {
+            mListener = (OnMovieDetailFragmentListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnCheeseDetailFragmentListener");
+        }
+    }
+
+    public interface OnMovieDetailFragmentListener {
+        void onReviewClick(String fbID);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.movie_details_back_button:
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                fm.popBackStack();
+                break;
+        }
+    }
 
     @Nullable
     @Override
@@ -151,114 +195,42 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         numof_reiews = (TextView) view.findViewById(R.id.numof_reiews);
         movie_releasedate = (TextView) view.findViewById(R.id.movie_detail_releasedate);
         movie_musicdirector = (TextView) view.findViewById(R.id.movie_detail_mdirector);
-        frndrevlistView = (ExpandedListView) view.findViewById(R.id.friends_review_list);
-        criticrevlistview = (ExpandedListView) view.findViewById(R.id.critic_review_list);
-        otherlistview = (ExpandedListView) view.findViewById(R.id.others_review_list);
+        movie_cast = (TextView) view.findViewById(R.id.movie_detail_cast);
+        frndrevlistView = (NonScrollListView) view.findViewById(R.id.friends_review_list);
+        criticrevlistview = (NonScrollListView) view.findViewById(R.id.critic_review_list);
+        addRating = (Button) view.findViewById(R.id.add_rating_button);
+        backbutton = (LinearLayout) view.findViewById(R.id.movie_details_back_button);
+        frndrevlistView.setFocusable(false);
+        criticrevlistview.setFocusable(false);
+        backbutton.setOnClickListener(this);
 
-
-
+        addRating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.mainlist_fragment, AddRatingFragment.newInstance(movieID, hasMyrating));
+                ft.addToBackStack(null);
+                ft.commit();
+            }
+        });
+        moviedetailsvolley();
 
         return view;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
-
-//    @Override
-//    public void onCreateOptionsMenu(
-//            Menu menu, MenuInflater inflater) {
-//        inflater.inflate(R.menu.menu_add_review, menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // handle item selection
-//        switch (item.getItemId()) {
-//            case R.id.add_review:
-//                LayoutInflater layoutInflaterAndroid = LayoutInflater.from(getActivity());
-//                View mView = layoutInflaterAndroid.inflate(R.layout.add_review, null);
-//                AlertDialog.Builder alertDialogBuilderUserInput = new AlertDialog.Builder(getActivity());
-//                alertDialogBuilderUserInput.setView(mView);
-//                final EditText addreviewText = (EditText) mView.findViewById(R.id.add_review_text);
-//                final Resources resources = getResources();
-//                rotationRatingBar = (RotationRatingBar) mView.findViewById(R.id.rotationratingbar_main);
-//                rotationRatingBar.setStarPadding(20);
-//
-//                alertDialogBuilderUserInput
-//                        .setCancelable(false)
-//                        .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialogBox, int id) {
-//                                // ToDo get user input here
-//                                AddReview(addreviewText.getText().toString(), Integer.parseInt(movieID), Long.parseLong(restoreduserid), rotationRatingBar.getRating());
-//                            }
-//                        })
-//
-//                        .setNegativeButton("Cancel",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialogBox, int id) {
-//                                        dialogBox.cancel();
-//                                    }
-//                                });
-//
-//                AlertDialog alertDialogAndroid = alertDialogBuilderUserInput.create();
-//                alertDialogAndroid.show();
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-//    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMovieDetailFragmentListener) {
-            mListener = (OnMovieDetailFragmentListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnCheeseDetailFragmentListener");
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-//         ((MainActivity) getActivity()).getToolbar().hideOverflowMenu();
-
-    }
-
-    public interface OnMovieDetailFragmentListener {
-
     }
 
     public void moviedetailsvolley() {
 
         String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=" + movieName + "&fbIds=" + frindsIDs + "&UserFbID=" + restoreduserid;
-//        String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=fidaa&fbIds=715741731&UserFbID=107886109817802";
-        //String url = "http://jaffareviews.com/api/Movie/GetMovie?movieName=manam&fbIds="+frindsIDs+"&UserFbID="+restoreduserid;
 
         JsonObjectRequest jsonRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.print(response);
-                        // the response is already constructed as a JSONObject!
                         try {
-                            listRevfrnd_fbId = new ArrayList<String>();
-                            listRevfrnd_rating = new ArrayList<String>();
-                            listRevfrnd_revtext = new ArrayList<String>();
-                            listRevfrnd_revname = new ArrayList<String>();
 
-                            listRevcritic_fbId = new ArrayList<String>();
-                            listRevcritic_rating = new ArrayList<String>();
-                            listRevcritic_revtext = new ArrayList<String>();
-                            listRevcritic_revname = new ArrayList<String>();
-
-                            listRevother_fbId = new ArrayList<String>();
-                            listRevother_rating = new ArrayList<String>();
-                            listRevother_revtext = new ArrayList<String>();
-                            listRevother_revname = new ArrayList<String>();
+                            ArrayList<MoviedetailReviewsPOJO> listUserReviewItems_Friends = new ArrayList<>();
+                            ArrayList<MoviedetailReviewsPOJO> listUserReviewItems_Critics = new ArrayList<>();
 
                             if (response.has("Movie")) {
                                 JSONObject responseObject = response.getJSONObject("Movie");
@@ -271,62 +243,65 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
                                 movieMusicDirector = responseObject.optString("MusicDirector");
                                 movieImage = responseObject.optString("MovieImage");
                                 movieCoverPic = responseObject.optString("WideImage");
+                                numberofreviews = responseObject.optString("NumOfRatings")+ " Reviews";
+                                movieCast = responseObject.optString("Cast");
+                                hasMyrating = responseObject.optBoolean("HasMyRating");
 
                                 if (responseObject.has("Reviews")) {
                                     JSONArray jsonArray = responseObject.getJSONArray("Reviews");
-                                    numberofreviews = jsonArray.length() + " Reviews";
 
-                                    int j = 0, k = 0, l = 0;
                                     for (int i = 0; i < jsonArray.length(); i++) {
                                         if (jsonArray.getJSONObject(i).optString("IsFriend").equalsIgnoreCase("true")) {
-                                            listRevfrnd_fbId.add(j, (jsonArray.getJSONObject(i).optString("FbID")));
-                                            listRevfrnd_rating.add(j, (jsonArray.getJSONObject(i).optString("MovieRating")));
-                                            listRevfrnd_revtext.add(j, (jsonArray.getJSONObject(i).optString("MovieReview")));
-                                            listRevfrnd_revname.add(j, (jsonArray.getJSONObject(i).optString("ReviewerName")));
-                                            j++;
-                                        } else if (jsonArray.getJSONObject(i).optString("IsFollower").equalsIgnoreCase("true") && jsonArray.getJSONObject(i).optString("IsCritic").equalsIgnoreCase("true")) {
-                                            listRevcritic_fbId.add(k, (jsonArray.getJSONObject(i).optString("FbID")));
-                                            listRevcritic_rating.add(k, (jsonArray.getJSONObject(i).optString("MovieRating")));
-                                            listRevcritic_revtext.add(k, (jsonArray.getJSONObject(i).optString("MovieReview")));
-                                            listRevcritic_revname.add(k, (jsonArray.getJSONObject(i).optString("ReviewerName")));
-                                            k++;
-                                        } else if (jsonArray.getJSONObject(i).optString("IsCritic").equalsIgnoreCase("true")) {
-                                            listRevother_fbId.add(l, (jsonArray.getJSONObject(i).optString("FbID")));
-                                            listRevother_rating.add(l, (jsonArray.getJSONObject(i).optString("MovieRating")));
-                                            listRevother_revtext.add(l, (jsonArray.getJSONObject(i).optString("MovieReview")));
-                                            listRevother_revname.add(l, (jsonArray.getJSONObject(i).optString("ReviewerName")));
-                                            l++;
+                                            MoviedetailReviewsPOJO  friendReviews = new MoviedetailReviewsPOJO();
+                                            friendReviews.setUserFBId(jsonArray.getJSONObject(i).optString("FbID"));
+                                            friendReviews.setUserRating(jsonArray.getJSONObject(i).optString("MovieRating"));
+                                            friendReviews.setUserReviewText(jsonArray.getJSONObject(i).optString("MovieReview"));
+                                            friendReviews.setUserName(jsonArray.getJSONObject(i).optString("ReviewerName"));
+                                            friendReviews.setUserReviewDate(jsonArray.getJSONObject(i).optString("ReviewDate"));
+                                            friendReviews.setUserReviewGif(jsonArray.getJSONObject(i).optString("GifURL"));
+                                            friendReviews.setUserReviewTag(jsonArray.getJSONObject(i).optString("UserTags"));
+                                            listUserReviewItems_Friends.add(friendReviews);
+                                        } else {
+                                            MoviedetailReviewsPOJO  criticReviews = new MoviedetailReviewsPOJO();
+                                            criticReviews.setUserFBId(jsonArray.getJSONObject(i).optString("FbID"));
+                                            criticReviews.setUserRating(jsonArray.getJSONObject(i).optString("MovieRating"));
+                                            criticReviews.setUserReviewText(jsonArray.getJSONObject(i).optString("MovieReview"));
+                                            criticReviews.setUserName(jsonArray.getJSONObject(i).optString("ReviewerName"));
+                                            criticReviews.setUserReviewDate(jsonArray.getJSONObject(i).optString("ReviewDate"));
+                                            criticReviews.setUserReviewGif(jsonArray.getJSONObject(i).optString("GifURL"));
+                                            criticReviews.setUserReviewTag(jsonArray.getJSONObject(i).optString("UserTags"));
+                                            listUserReviewItems_Critics.add(criticReviews);
                                         }
                                     }
                                 }
 
-                                if (listRevfrnd_fbId.size() > 0) {
-                                    frndsrevadapter = new FriendReviewsAdapter(getActivity(), listRevfrnd_fbId, listRevfrnd_rating, listRevfrnd_revtext, listRevfrnd_revname);
+                                if (listUserReviewItems_Friends.size() > 0) {
+                                    frndsrevadapter = new FriendReviewsAdapter(getActivity(), listUserReviewItems_Friends);
                                     frndrevlistView.setAdapter(frndsrevadapter);
                                     new Task().execute();
 
                                 }
-                                if (listRevcritic_fbId.size() > 0) {
-                                    criticrevadapter = new CriticReviewsAdapter(getActivity(), listRevcritic_fbId, listRevcritic_rating, listRevcritic_revtext, listRevcritic_revname);
+                                if (listUserReviewItems_Critics.size() > 0) {
+                                    criticrevadapter = new CriticReviewsAdapter(getActivity(), listUserReviewItems_Critics);
                                     criticrevlistview.setAdapter(criticrevadapter);
 
                                 }
-                                if (listRevother_fbId.size() > 0) {
-                                    othersrevadapter = new OthersReviewsAdapter(getActivity(), listRevother_fbId, listRevother_rating, listRevother_revtext, listRevother_revname, restoreduserid);
-                                    otherlistview.setAdapter(othersrevadapter);
-
-                                    otherlistview.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-
-                                        @Override
-                                        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                                            otherlistview.removeOnLayoutChangeListener(this);
-                                            //detailProgress.setVisibility(View.GONE);
-                                        }
-                                    });
-
-                                    othersrevadapter.notifyDataSetChanged();
-
-                                }
+//                                if (listRevother_fbId.size() > 0) {
+//                                    othersrevadapter = new OthersReviewsAdapter(getActivity(), listRevother_fbId, listRevother_rating, listRevother_revtext, listRevother_revname, restoreduserid);
+//                                    otherlistview.setAdapter(othersrevadapter);
+//
+//                                    otherlistview.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+//
+//                                        @Override
+//                                        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+//                                            otherlistview.removeOnLayoutChangeListener(this);
+//                                            //detailProgress.setVisibility(View.GONE);
+//                                        }
+//                                    });
+//
+//                                    othersrevadapter.notifyDataSetChanged();
+//
+//                                }
                                 setMovieValues();
                                 setCoverPic(movieCoverPic);
                                 setImage(movieImage);
@@ -393,13 +368,6 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         VolleySingleton.getInstance().addToRequestQueue(imgRequest);
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-
-        }
-    }
-
     public void setMovieValues() {
         movie_title.setText(movieName);
         movie_releasedate.setText(setDate(movieReleaseDate));
@@ -407,7 +375,9 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         movie_musicdirector.setText(movieMusicDirector);
         movie_rating.setText(movieRating + " %");
         numof_reiews.setText(numberofreviews);
-
+        movie_cast.setText(movieCast);
+        if(hasMyrating)
+            addRating.setText("Edit Rating");
     }
 
 
@@ -484,7 +454,6 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         }
     }
 
-
     public void setCoverPic(String url){
         final Handler handler = new Handler();
         ImageRequest imgRequest = new ImageRequest(url,
@@ -511,9 +480,6 @@ public class MovieDetailFragment extends ListFragment implements View.OnClickLis
         });
         VolleySingleton.getInstance().addToRequestQueue(imgRequest);
     }
-
-
-
 
     public void setProfilePic(String url){
         ImageRequest imgRequest = new ImageRequest(url,
