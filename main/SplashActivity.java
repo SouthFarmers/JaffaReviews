@@ -68,6 +68,7 @@ import jaffa.com.jaffareviews.Helpers.Constants;
  * Created by gautham on 11/21/17.
  */
 
+
 public class SplashActivity extends AppCompatActivity implements View.OnClickListener{
 
     private String firstName,lastName, email, coverpic;
@@ -91,7 +92,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
-    protected String SENDER_ID = "499436940184";
+    protected String SENDER_ID = "43283639347";
     private GoogleCloudMessaging gcm =null;
     private String regid = null;
     private Context context= null;
@@ -143,6 +144,8 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
                 }
             }
         }, 5);
+
+
     }
 
     @Override
@@ -332,7 +335,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
                 SharedPreferences.Editor editor3 = getSharedPreferences(friendsIDs, MODE_PRIVATE).edit();
                 editor3.putString(friendsIDs, frindsIDs);
                 editor3.commit();
-                alertDialogAndroid.dismiss();
+//                alertDialogAndroid.dismiss();
                 splashProgress.setVisibility(View.GONE);
 //                startActivity(intent);
 
